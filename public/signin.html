@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Customer Sign In</title>
+
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body class="signin-page">
+
+    <div class="signin-container">
+
+        <div class="signin-card">
+
+            <h1>Customer Sign In</h1>
+
+            <p class="subtitle">
+                Please enter your information below.
+            </p>
+
+            <form id="signinForm">
+
+                <label for="Name">
+                    Customer Name
+                </label>
+
+                <input type="text" id="name" name="name" required autocomplete="name">
+
+
+                <label for="company">
+                    Company Name
+                </label>
+
+                <input type="text" id="company" name="company" required>
+
+
+                <label for="date">
+                    Date
+                </label>
+
+                <input type="date" id="date" name="date">
+
+
+                <label for="purpose">
+                    Purpose
+                </label>
+
+                <textarea id="purpose" name="purpose" rows="4"
+                    placeholder="Please list the reason for your visit." required></textarea>
+
+
+                <label for="phone">
+                    Phone Number
+                </label>
+
+                <input
+                    type="tel"
+                    id="phone"
+                    name="phone"
+                    inputmode="numeric"
+                    autocomplete="tel"
+                    maxlength="14"
+                    pattern="\(\d{3}\) \d{3}-\d{4}"
+                >
+
+
+                <label for="email">
+                    Email
+                </label>
+
+                <input type="email" id="email" name="email">
+
+
+                <label for="notes">
+                    Additional Information
+                </label>
+
+                <textarea id="notes" name="notes" rows="3"></textarea>
+
+
+                <button type="submit" class="primary-button">
+                    Sign In
+                </button>
+
+            </form>
+
+            <div id="successMessage" class="success-message" hidden>
+                Thank you. You have been signed in.
+            </div>
+
+        </div>
+
+    </div>
+
+    <script src="signin.js"></script>
+
+</body>
+
+</html>

@@ -1,0 +1,23 @@
+{
+    "name": "lobby-signin-system",
+    "version": "1.0.0",
+    "description": "Customer sign-in and lobby queue system",
+    "main": "app.js",
+    "bin": "app.js",
+    "scripts": {
+        "start": "node app.js",
+        "build:exe": "pkg . --targets node18-win-x64 --output dist/LobbyApp.exe"
+    },
+    "dependencies": {
+        "express": "^4.21.2"
+    },
+    "devDependencies": {
+        "pkg": "^5.8.1"
+    },
+    "pkg": {
+        "assets": [
+            "public/**/*",
+            "customers.txt"
+        ]
+    }
+}

@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Admin Dashboard</title>
+
+    <link rel="stylesheet" href="style.css">
+
+</head>
+
+
+<body class="admin-page">
+
+    <header class="admin-header">
+
+        <div>
+
+            <h1>Admin Dashboard</h1>
+
+            <p>
+                Customer Sign-In & Lobby Queue
+            </p>
+
+        </div>
+
+        <div class="admin-links">
+
+            <a
+                href="lobby.html"
+                target="_blank"
+            >
+                Open Lobby Display
+            </a>
+
+            <a
+                href="signin.html"
+                target="_blank"
+            >
+                Open Sign-In Sheet
+            </a>
+
+            <button
+                id="logoutButton"
+                class="secondary-button"
+            >
+                Log Out
+            </button>
+
+        </div>
+
+    </header>
+
+
+    <main class="admin-content">
+
+
+        <section class="stats">
+
+            <div class="stat-card">
+
+                <span class="stat-number" id="totalCustomers">
+                    0
+                </span>
+
+                <span class="stat-label">
+                    Total Customers
+                </span>
+
+            </div>
+
+
+            <div class="stat-card">
+
+                <span class="stat-number" id="preparingCount">
+                    0
+                </span>
+
+                <span class="stat-label">
+                    Preparing
+                </span>
+
+            </div>
+
+
+            <div class="stat-card">
+
+                <span class="stat-number" id="readyCount">
+                    0
+                </span>
+
+                <span class="stat-label">
+                    Ready
+                </span>
+
+            </div>
+
+        </section>
+
+
+        <section class="customer-section">
+
+            <div class="section-header">
+
+                <h2>Currently Signed In</h2>
+
+                <button
+                    id="refreshButton"
+                    class="secondary-button"
+                >
+                    Refresh
+                </button>
+
+                <button
+                    id="exportHistoryButton"
+                    class="secondary-button"
+                >
+                    Export History
+                </button>
+
+            </div>
+
+
+            <div class="table-container">
+
+                <table>
+
+                    <thead>
+
+                        <tr>
+
+                            <th>Visitor Name</th>
+
+                            <th>Company Name</th>
+
+                            <th>Photo</th>
+
+                            <th>Date</th>
+
+                            <th>Time In</th>
+
+                            <th>Time Out</th>
+
+                            <th>Purpose</th>
+
+                            <th>Phone</th>
+
+                            <th>Email</th>
+
+                            <th>Notes</th>
+
+                            <th>Status</th>
+
+                            <th>Actions</th>
+
+                        </tr>
+
+                    </thead>
+
+
+                    <tbody id="currentCustomerTable">
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </section>
+
+
+        <section class="customer-section history-section">
+
+            <div class="section-header">
+
+                <h2>Visit History</h2>
+
+            </div>
+
+
+            <div class="table-container">
+
+                <table>
+
+                    <thead>
+
+                        <tr>
+
+                            <th>Visitor Name</th>
+
+                            <th>Company Name</th>
+
+                            <th>Photo</th>
+
+                            <th>Date</th>
+
+                            <th>Time In</th>
+
+                            <th>Time Out</th>
+
+                            <th>Purpose</th>
+
+                            <th>Phone</th>
+
+                            <th>Email</th>
+
+                            <th>Notes</th>
+
+                            <th>Status</th>
+
+                            <th>Actions</th>
+
+                        </tr>
+
+                    </thead>
+
+
+                    <tbody id="customerTable">
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </section>
+
+    </main>
+
+
+    <script src="admin.js"></script>
+
+</body>
+
+</html>
