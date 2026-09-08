@@ -652,11 +652,25 @@ td {
 }
 
 
-.lobby-header h1 {
+.lobby-brand {
 
-    margin: 0;
+    display: flex;
 
-    font-size: 42px;
+    align-items: center;
+
+    min-width: 180px;
+}
+
+
+.lobby-logo {
+
+    max-height: 80px;
+
+    width: auto;
+
+    display: block;
+
+    filter: drop-shadow(0 5px 12px rgba(0, 0, 0, 0.4));
 }
 
 

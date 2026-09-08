@@ -16,6 +16,12 @@ const readyCount =
 const refreshButton =
     document.getElementById("refreshButton");
 
+const importCustomerFile =
+    document.getElementById("importCustomerFile");
+
+const importHistoryButton =
+    document.getElementById("importHistoryButton");
+
 const exportHistoryButton =
     document.getElementById("exportHistoryButton");
 
@@ -754,6 +760,52 @@ function escapeHTML(value) {
 refreshButton.addEventListener(
     "click",
     loadCustomers
+);
+
+
+importHistoryButton.addEventListener(
+    "click",
+    function () {
+        importCustomerFile.click();
+    }
+);
+
+
+importCustomerFile.addEventListener(
+    "change",
+    async function () {
+        const file = importCustomerFile.files?.[0];
+
+        if (!file) {
+            return;
+        }
+
+        try {
+
+            const csvText = await file.text();
+
+            const response = await fetch("/api/customers/import", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "text/csv"
+                },
+                body: csvText
+            });
+
+            const result = await response.json();
+
+            if (!response.ok) {
+                throw new Error(result.error || "Could not import CSV data.");
+            }
+
+            importCustomerFile.value = "";
+            await loadCustomers();
+            alert(`Imported ${result.importedRows || 0} visit rows.`);
+
+        } catch (error) {
+            alert(error.message);
+        }
+    }
 );
 
 

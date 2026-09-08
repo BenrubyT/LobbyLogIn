@@ -315,10 +315,10 @@ form.addEventListener(
         const company = companyInput.value.trim();
         const purpose = purposeInput.value.trim();
 
-        if (!name || !company || !purpose) {
+        if (!name || !purpose || !phoneInput.value.trim()) {
 
             showValidationMessage(
-                "Name, company, and purpose are required."
+                "Name, purpose, and phone number are required."
             );
 
             return;

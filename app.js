@@ -18,6 +18,7 @@ const ADMIN_PASSWORD = "transpere";
 const adminSessions = new Set();
 
 app.use(express.json({ limit: "10mb" }));
+app.use(express.text({ type: "text/csv", limit: "10mb" }));
 
 
 function getCookieValue(req, name) {
@@ -385,6 +386,215 @@ function getVisitHistory(customer) {
 }
 
 
+function customerKey(name, company) {
+
+    return `${normalize(name)}|${normalize(company)}`;
+}
+
+
+function statusForCSV(value) {
+
+    const normalized = String(value || "")
+        .trim()
+        .toLowerCase();
+
+    if (["preparing", "ready", "none"].includes(normalized)) {
+        return normalized;
+    }
+
+    return "none";
+}
+
+
+function parseCSVLine(line) {
+
+    const values = [];
+    let field = "";
+    let inQuotes = false;
+
+    for (let i = 0; i < line.length; i += 1) {
+        const char = line[i];
+
+        if (char === '"') {
+            if (inQuotes && line[i + 1] === '"') {
+                field += '"';
+                i += 1;
+            } else {
+                inQuotes = !inQuotes;
+            }
+            continue;
+        }
+
+        if (char === "," && !inQuotes) {
+            values.push(field);
+            field = "";
+            continue;
+        }
+
+        field += char;
+    }
+
+    values.push(field);
+
+    return values.map(item => item.trim());
+}
+
+
+function parseCSVRecords(csvText) {
+
+    const cleanText = String(csvText || "")
+        .replace(/^\uFEFF/, "")
+        .replace(/\r/g, "");
+
+    if (!cleanText.trim()) {
+        return [];
+    }
+
+    const lines = cleanText
+        .split("\n")
+        .filter(line => line.trim().length > 0);
+
+    if (lines.length < 2) {
+        return [];
+    }
+
+    const header = parseCSVLine(lines[0]);
+
+    return lines.slice(1).map(line => {
+        const row = parseCSVLine(line);
+        const record = {};
+
+        header.forEach((key, index) => {
+            record[key] = row[index] || "";
+        });
+
+        return record;
+    }).filter(row => {
+        return String(row.Name || "").trim() ||
+            String(row.Company || "").trim();
+    });
+}
+
+
+function mergeCustomers(customers, importedRows) {
+
+    const groups = new Map();
+
+    customers.forEach(customer => {
+
+        const key = customerKey(customer.name, customer.company);
+
+        if (!groups.has(key)) {
+            groups.set(key, {
+                id: customer.id || Date.now().toString(),
+                name: String(customer.name || "").trim(),
+                company: String(customer.company || "").trim(),
+                visited: getVisitHistory(customer),
+                purpose: String(customer.purpose || "").trim(),
+                phone: String(customer.phone || "").trim(),
+                email: String(customer.email || "").trim(),
+                notes: String(customer.notes || "").trim(),
+                status: String(customer.status || "none").trim().toLowerCase(),
+                inLobby: Boolean(customer.inLobby),
+                createdAt: customer.createdAt || new Date().toISOString(),
+                lastUpdated: customer.lastUpdated || customer.createdAt || new Date().toISOString(),
+                photo: customer.photo || ""
+            });
+
+            return;
+        }
+
+        const group = groups.get(key);
+
+        group.visited = group.visited.concat(getVisitHistory(customer));
+        group.status = statusForCSV(customer.status || group.status);
+        group.inLobby = group.inLobby || Boolean(customer.inLobby);
+        group.phone = group.phone || String(customer.phone || "").trim();
+        group.email = group.email || String(customer.email || "").trim();
+        group.notes = group.notes || String(customer.notes || "").trim();
+        group.purpose = group.purpose || String(customer.purpose || "").trim();
+        group.photo = group.photo || customer.photo || "";
+    });
+
+    importedRows.forEach(row => {
+
+        const name = String(row.Name || "").trim();
+        const company = String(row.Company || "").trim();
+
+        if (!name || !company) {
+            return;
+        }
+
+        const key = customerKey(name, company);
+
+        if (!groups.has(key)) {
+            groups.set(key, {
+                id: Date.now().toString() + Math.round(Math.random() * 1000),
+                name,
+                company,
+                visited: [],
+                purpose: String(row.Purpose || "").trim(),
+                phone: formatPhoneNumber(row.Phone || ""),
+                email: String(row.Email || "").trim(),
+                notes: String(row.Notes || "").trim(),
+                status: statusForCSV(row.Status || "none"),
+                inLobby: statusForCSV(row.Status || "none") !== "none",
+                createdAt: new Date().toISOString(),
+                lastUpdated: new Date().toISOString(),
+                photo: ""
+            });
+        }
+
+        const group = groups.get(key);
+
+        const visit = buildVisit(
+            formatVisitDate(row.Date || ""),
+            String(row["Time In"] || "").trim(),
+            String(row["Time Out"] || "").trim(),
+            String(row.Purpose || "").trim()
+        );
+
+        if (visit) {
+            group.visited.push(visit);
+        }
+
+        group.name = name;
+        group.company = company;
+        group.purpose = String(row.Purpose || group.purpose || "").trim();
+        group.phone = group.phone || formatPhoneNumber(row.Phone || "");
+        group.email = group.email || String(row.Email || "").trim();
+        group.notes = group.notes || String(row.Notes || "").trim();
+
+        const rowStatus = statusForCSV(row.Status || "none");
+        if (rowStatus !== "none") {
+            group.status = rowStatus;
+            group.inLobby = true;
+        } else {
+            group.status = group.status || "none";
+            group.inLobby = group.inLobby || false;
+        }
+
+        group.lastUpdated = new Date().toISOString();
+    });
+
+    return Array.from(groups.values()).map(group => ({
+        id: group.id,
+        name: group.name,
+        company: group.company,
+        visited: group.visited,
+        purpose: group.purpose,
+        phone: formatPhoneNumber(group.phone || ""),
+        email: group.email,
+        notes: group.notes,
+        status: statusForCSV(group.status || "none"),
+        inLobby: group.inLobby === true && statusForCSV(group.status || "none") !== "none",
+        createdAt: group.createdAt,
+        lastUpdated: group.lastUpdated,
+        photo: group.photo || ""
+    }));
+}
+
+
 // =========================================
 // FIND EXISTING CUSTOMER
 // =========================================
@@ -463,11 +673,15 @@ app.post("/api/customers", (req, res) => {
     } = req.body;
 
 
-    if (!name || !company || !purpose) {
+    if (
+        !String(name || "").trim() ||
+        !String(purpose || "").trim() ||
+        !String(phone || "").trim()
+    ) {
 
         return res.status(400).json({
             error:
-                "Name, company, and purpose are required."
+                "Name, purpose, and phone number are required."
         });
 
     }
@@ -517,7 +731,7 @@ app.post("/api/customers", (req, res) => {
             name.trim();
 
         existingCustomer.company =
-            company.trim();
+            String(company || "").trim();
 
         const newVisit = buildVisit(
             getCurrentDate(),
@@ -592,7 +806,7 @@ app.post("/api/customers", (req, res) => {
 
         name: name.trim(),
 
-        company: company.trim(),
+        company: String(company || "").trim(),
 
         visited: [
             buildVisit(
@@ -890,6 +1104,50 @@ app.listen(PORT, () => {
 
     console.log("");
 
+});
+
+
+// =========================================
+// IMPORT CUSTOMER HISTORY
+// =========================================
+
+app.post("/api/customers/import", requireAdmin, (req, res) => {
+
+    const csvText = String(req.body || "");
+
+    if (!csvText.trim()) {
+        return res.status(400).json({
+            error: "No CSV file was provided."
+        });
+    }
+
+    try {
+
+        const importedRows = parseCSVRecords(csvText);
+
+        if (importedRows.length === 0) {
+            return res.status(400).json({
+                error: "The uploaded CSV does not contain customer records."
+            });
+        }
+
+        const customers = readCustomers();
+        const merged = mergeCustomers(customers, importedRows);
+
+        writeCustomers(merged);
+
+        return res.json({
+            success: true,
+            importedRows: importedRows.length,
+            customers: merged.length
+        });
+
+    } catch (error) {
+        console.error(error);
+        return res.status(400).json({
+            error: "Could not import the CSV file."
+        });
+    }
 });
 
 
