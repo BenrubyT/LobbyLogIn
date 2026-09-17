@@ -14,7 +14,7 @@ LobbyApp is a web application designed for managing customer sign-ins and visits
 
 1. Clone the repository:
    ```
-   git clone <repository-url>
+   git clone https://github.com/BenrubyT/LobbyLogIn
    ```
 
 2. Navigate to the project directory:
@@ -52,6 +52,3 @@ LobbyApp is a web application designed for managing customer sign-ins and visits
 
 Contributions are welcome! Please submit a pull request or open an issue for any enhancements or bug fixes.
 
-## License
-
-This project is licensed under the MIT License. See the LICENSE file for details.
