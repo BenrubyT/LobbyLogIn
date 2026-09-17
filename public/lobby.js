@@ -1,6 +1,9 @@
 const lobbyList =
     document.getElementById("lobbyList");
 
+const lobbyTickerTrack =
+    document.getElementById("lobbyTickerTrack");
+
 
 // -----------------------------------------
 // LOAD LOBBY
@@ -26,6 +29,47 @@ async function loadLobby() {
         );
 
     }
+}
+
+
+// -----------------------------------------
+// DAILY TICKER
+// -----------------------------------------
+
+function renderTicker() {
+
+    const tickerItems = [
+        "Transpere is a national ITAD (Information Technology Asset Disposition) company with over 30 years' experience in managing IT related assets for corporations, healthcare, government and education.", "Founded in 2016 with 25+ years’ experience in the ITAD industry, Transpere has established strategic partnerships with leading technology providers. We are trusted by thousands of companies, from small and medium-size businesses to over 80% of all Fortune 1000 companies in the United States.",
+        "Proper retirement of IT assets can be very complicated due to factors ranging from environmental sustainability to data security. That's where Transpere comes in. We are helping companies properly retire their technology assets in a way that doesn't compromise their data security or harm the environment while recovering value from hardware."
+    ];
+
+    const itemMarkup = tickerItems
+        .map(item => `
+            <span class="lobby-ticker-item">
+                ${escapeHTML(item)}
+            </span>
+        `)
+        .join("");
+
+    lobbyTickerTrack.innerHTML = itemMarkup + itemMarkup;
+
+    window.requestAnimationFrame(() => {
+        const tickerSpeed = 50;
+        const loopDistance = lobbyTickerTrack.scrollWidth / 2;
+        const loopDuration = Math.max(28, loopDistance / tickerSpeed);
+
+        lobbyTickerTrack.style.setProperty(
+            "--ticker-duration",
+            `${loopDuration}s`
+        );
+
+        lobbyTickerTrack.style.setProperty(
+            "--ticker-loop-distance",
+            `${loopDistance}px`
+        );
+
+        lobbyTickerTrack.classList.add("is-ready");
+    });
 }
 
 
@@ -169,11 +213,12 @@ function escapeHTML(value) {
 // AUTO UPDATE
 // -----------------------------------------
 
+renderTicker();
 loadLobby();
 
 
-// Check for changes every 3 seconds
-setInterval(loadLobby, 3000);
+// Check for changes every 5 minutes
+setInterval(loadLobby, 300000);
 
 
 // Update clock every second
